@@ -11,6 +11,12 @@ import { t } from "@/app/i18n.js";
 import { navigateTo } from "@/app/navigation.js";
 import { showToast } from "@/components/toast.js";
 
+const widthCanvas = 300;
+const heightCanvas = 150;
+
+	// const prevPosX = ball.prevPosX * widthCanvas / 100;
+	// const prevPosY = ball.prevPosY * heightCanvas / 100;
+
 export function actualizeValues(posPlayerL:number, playerL:Player, posPlayerR:number, playerR:Player,
 	pointsL:number, pointsR:number, scores:Score, ballX:number, ballY:number, ball:Ball)
 {
@@ -32,6 +38,7 @@ function actualizeGame(playerLeft: Player, playerRight: Player,
 	if (!canvas)
 		return ;
 	console.log("height=", canvas.height);
+	console.log("width=", canvas.width);
 	if (canvas.height < 500)
 	{
 		playerLeft.paddle.classList.replace("h-32", "h-10");
@@ -51,18 +58,18 @@ function actualizeGame(playerLeft: Player, playerRight: Player,
 	playerRight.paddle.style.top = playerRight.posY.toString() + "%";
 
 	/* CAMBIAR LA PELOTA DE SITIO */
-	const prevPosX = ball.prevPosX * 2000 / 100;
-	const prevPosY = ball.prevPosY * 1250 / 100;
+	const prevPosX = ball.prevPosX * widthCanvas / 100;
+	const prevPosY = ball.prevPosY * heightCanvas / 100;
 	const ctx = canvas.getContext("2d")!;
 	ctx.fillStyle = "black";
 	ctx.beginPath();
-	ctx.arc(prevPosX, prevPosY, 20, 0, Math.PI * 2);
+	ctx.arc(prevPosX, prevPosY, 10, 0, Math.PI * 2);
 	ctx.fill();
-	const posX = ball.posX * 2000 / 100;
-	const posY = ball.posY * 1250 / 100;
+	const posX = ball.posX * widthCanvas / 100;
+	const posY = ball.posY * heightCanvas / 100;
 	ctx.fillStyle = "white";
 	ctx.beginPath();
-	ctx.arc(posX, posY, 15, 0, Math.PI * 2);
+	ctx.arc(posX, posY, 3, 0, Math.PI * 2);
 	ctx.fill();
 	ball.prevPosX = ball.posX;
 	ball.prevPosY = ball.posY;
@@ -94,8 +101,8 @@ export function startGame()
 	// const ctx = canvas.getContext('2d');
 
 	// // Maintain virtual resolution
-	// canvas.width = 2000;
-	// canvas.height = 1250;
+	// canvas.width = widthCanvas;
+	// canvas.height = heightCanvas;
 
 	// // Scale drawing to fit CSS size
 	// function resizeCanvas() {
@@ -193,7 +200,16 @@ export function startGame()
 	// Draw a white dot in the center
 	ctx.fillStyle = "white";
 	ctx.beginPath();
-	ctx.arc(ball.posX * 2000 / 100, ball.posY * 1250 / 100, 15, 0, Math.PI * 2);
+	ctx.arc(ball.posX * widthCanvas / 100, ball.posY * heightCanvas / 100, 3, 0, Math.PI * 2);
 	ctx.fill();
 	socketAndRender(playerLeft, playerRight, scores, ball);
 }
+
+/*
+tamaño palas  20
+pos pal
+ancho palas
+
+
+
+*/

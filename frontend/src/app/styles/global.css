@@ -115,6 +115,11 @@
     transform: rotateZ(90deg);
   }
 
+  #canvasContainer, #gameCanvas
+  {
+    max-height: none !important;
+  }
+
   /* === TABLE -> CARDS EN MOBILE === */
   @media (max-width: 640px) {
     /* Convertimos tabla en bloques */
