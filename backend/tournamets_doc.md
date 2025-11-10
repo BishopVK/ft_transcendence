@@ -112,7 +112,7 @@ VALUES ('pong_tournament', 2, 2, 0);
 
 ## 3. **ESTRUCTURA DE ARCHIVOS PROPUESTA**
 
-```/dev/null/tree.txt#L1-70
+```/dev/null/tree.txt#L1-100
 backend/src/features/
 ├── tournaments/                     # Nueva feature principal
 │   ├── manager/                    # Lógica de negocio del torneo
@@ -138,21 +138,56 @@ backend/src/features/
 │   │       ├── TournamentValidator.ts
 │   │       └── TournamentFormatter.ts
 │   │
-│   ├── http/                       # API REST para operaciones CRUD
-│   │   ├── routes/
-│   │   │   └── tournament.routes.ts
+│   ├── http/                       # API REST siguiendo Vertical Slices
+│   │   ├── tournament.http.ts     # Archivo principal de registro de rutas
 │   │   │
-│   │   ├── controllers/
-│   │   │   ├── TournamentController.ts
-│   │   │   └── TournamentInvitationController.ts
+│   │   ├── CreateTournament/
+│   │   │   ├── CreateTournament.command.ts
+│   │   │   └── CreateTournament.route.ts
 │   │   │
-│   │   ├── dto/
-│   │   │   ├── CreateTournamentDto.ts
-│   │   │   ├── JoinTournamentDto.ts
-│   │   │   └── InvitationDto.ts
+│   │   ├── ListTournaments/
+│   │   │   ├── ListTournaments.command.ts
+│   │   │   └── ListTournaments.route.ts
 │   │   │
-│   │   └── middleware/
-│   │       └── TournamentValidation.middleware.ts
+│   │   ├── GetTournamentDetails/
+│   │   │   ├── GetTournamentDetails.command.ts
+│   │   │   └── GetTournamentDetails.route.ts
+│   │   │
+│   │   ├── JoinTournament/
+│   │   │   ├── JoinTournament.command.ts
+│   │   │   └── JoinTournament.route.ts
+│   │   │
+│   │   ├── LeaveTournament/
+│   │   │   ├── LeaveTournament.command.ts
+│   │   │   └── LeaveTournament.route.ts
+│   │   │
+│   │   ├── StartTournament/
+│   │   │   ├── StartTournament.command.ts
+│   │   │   └── StartTournament.route.ts
+│   │   │
+│   │   ├── SendTournamentInvitation/
+│   │   │   ├── SendTournamentInvitation.command.ts
+│   │   │   └── SendTournamentInvitation.route.ts
+│   │   │
+│   │   ├── AcceptTournamentInvitation/
+│   │   │   ├── AcceptTournamentInvitation.command.ts
+│   │   │   └── AcceptTournamentInvitation.route.ts
+│   │   │
+│   │   ├── RejectTournamentInvitation/
+│   │   │   ├── RejectTournamentInvitation.command.ts
+│   │   │   └── RejectTournamentInvitation.route.ts
+│   │   │
+│   │   ├── GetTournamentInvitations/
+│   │   │   ├── GetTournamentInvitations.command.ts
+│   │   │   └── GetTournamentInvitations.route.ts
+│   │   │
+│   │   ├── GetActiveTournament/
+│   │   │   ├── GetActiveTournament.command.ts
+│   │   │   └── GetActiveTournament.route.ts
+│   │   │
+│   │   └── CancelTournament/
+│   │       ├── CancelTournament.command.ts
+│   │       └── CancelTournament.route.ts
 │   │
 │   └── websocket/                  # Comunicación en tiempo real
 │       ├── websocket/
@@ -256,60 +291,89 @@ interface TournamentRestrictions {
 
 ## 5. **API HTTP - ENDPOINTS**
 
-### **Rutas REST para operaciones CRUD:**
+### **Rutas REST siguiendo arquitectura Vertical Slices:**
 
-```/dev/null/tournament.routes.ts#L1-60
-// POST /api/tournaments
-// Crear un nuevo torneo
+```typescript
+// Archivo principal: tournament.http.ts
+import { FastifyInstance } from 'fastify';
+import CreateTournamentRoute from './CreateTournament/CreateTournament.route';
+import JoinTournamentRoute from './JoinTournament/JoinTournament.route';
+import SendTournamentInvitationRoute from './SendTournamentInvitation/SendTournamentInvitation.route';
+// ... otros imports
+
+export default async function TournamentHttpRoutes(fastify: FastifyInstance) {
+    fastify.register(CreateTournamentRoute);
+    fastify.register(JoinTournamentRoute);
+    fastify.register(SendTournamentInvitationRoute);
+    fastify.register(AcceptTournamentInvitationRoute);
+    // ... otros registros
+}
+
+// Cada endpoint tiene su propia carpeta con command y route:
+
+// POST /api/tournaments - CreateTournament/
+// Request:
 {
     name: string;
     description?: string;
     maxParticipants: number;
     minParticipants?: number;
     format: 'single_elimination';
-    matchWinScore: number;    // Puntos para ganar
-    matchMaxTime?: number;    // Tiempo máximo por partida
+    matchWinScore: number;
+    matchMaxTime?: number;
 }
 
-// GET /api/tournaments
-// Listar todos los torneos (abiertos, en progreso, completados)
+// GET /api/tournaments - ListTournaments/
 // Query params: ?status=open&page=1&limit=10
 
-// GET /api/tournaments/:id
-// Obtener detalles de un torneo específico
+// GET /api/tournaments/:id - GetTournamentDetails/
 
-// POST /api/tournaments/:id/join
-// Unirse a un torneo abierto
+// POST /api/tournaments/:id/join - JoinTournament/
 // Body: {} (vacío, usa el userId del token)
 
-// DELETE /api/tournaments/:id/leave
-// Abandonar un torneo (solo si está en estado OPEN)
+// DELETE /api/tournaments/:id/leave - LeaveTournament/
 
-// POST /api/tournaments/:id/start
-// Iniciar el torneo (solo el creador, cuando min_participants alcanzado)
+// POST /api/tournaments/:id/start - StartTournament/
 
-// POST /api/tournaments/:id/invite
-// Enviar invitación a un torneo
+// POST /api/tournaments/:id/invite - SendTournamentInvitation/
 {
     invitedUserId: number;
+    message?: string;
+}
+// Respuesta:
+{
+    success: boolean;
+    invitationId: number;
+}
+// NOTA: Envía notificación automática por WebSocket via SocialWebSocketService
+
+// GET /api/tournaments/invitations - GetTournamentInvitations/
+// Respuesta:
+{
+    invitations: [{
+        id: number;
+        tournamentId: number;
+        tournamentName: string;
+        invitedBy: {
+            id: number;
+            username: string;
+            avatar: string | null;
+        };
+        message: string;
+        createdAt: string;
+        status: 'pending';
+    }]
 }
 
-// GET /api/tournaments/invitations
-// Listar invitaciones pendientes del usuario autenticado
+// POST /api/tournaments/invitations/:id/accept - AcceptTournamentInvitation/
 
-// POST /api/tournaments/invitations/:id/accept
-// Aceptar una invitación
+// POST /api/tournaments/invitations/:id/reject - RejectTournamentInvitation/
 
-// POST /api/tournaments/invitations/:id/reject
-// Rechazar una invitación
+// GET /api/tournaments/active - GetActiveTournament/
 
-// GET /api/tournaments/active
-// Obtener el torneo activo del usuario (si existe)
+// POST /api/tournaments/:id/cancel - CancelTournament/
 
-// POST /api/tournaments/:id/cancel
-// Cancelar un torneo (solo el creador, si está OPEN)
-
-// Validaciones importantes:
+// Validaciones importantes en cada command:
 // - Un usuario no puede crear un torneo si ya tiene uno activo
 // - Un usuario no puede unirse si ya está en otro torneo activo
 // - Un usuario no puede unirse si ya tiene una partida en curso
@@ -317,6 +381,107 @@ interface TournamentRestrictions {
 ```
 
 ## 6. **COMUNICACIÓN WEBSOCKET**
+
+### **Integración con SocialWebSocket para Invitaciones:**
+
+```typescript
+// SendTournamentInvitation/SendTournamentInvitation.command.ts
+import { FastifyInstance } from 'fastify';
+import { Result } from '@shared/abstractions/Result';
+import { ICommand } from '@shared/application/abstractions/ICommand.interface';
+import { ApplicationError } from '@shared/Errors';
+import { ISocialWebSocketService } from '@features/socialSocket/services/ISocialWebSocketService.interface';
+
+export interface ISendTournamentInvitationRequest {
+    fromUserId?: number;
+    tournamentId: number;
+    invitedUserId: number;
+    message?: string;
+}
+
+export interface ISendTournamentInvitationResponse {
+    success: boolean;
+    invitationId: number;
+}
+
+export default class SendTournamentInvitationCommand
+    implements ICommand<ISendTournamentInvitationRequest, ISendTournamentInvitationResponse>
+{
+    private readonly socialWebSocketService: ISocialWebSocketService;
+    private readonly tournamentRepository: ITournamentRepository;
+    private readonly tournamentInvitationRepository: ITournamentInvitationRepository;
+
+    constructor(private readonly fastify: FastifyInstance) {
+        this.socialWebSocketService = this.fastify.SocialWebSocketService;
+        this.tournamentRepository = this.fastify.TournamentRepository;
+        this.tournamentInvitationRepository = this.fastify.TournamentInvitationRepository;
+    }
+
+    validate(request?: ISendTournamentInvitationRequest): Result<void> {
+        // Validaciones similares a SendGameInvitation.command.ts
+        if (!request?.fromUserId) {
+            return Result.error(ApplicationError.UnauthorizedAccess);
+        }
+        // ... más validaciones
+        return Result.success(undefined);
+    }
+
+    async execute(
+        request?: ISendTournamentInvitationRequest
+    ): Promise<Result<ISendTournamentInvitationResponse>> {
+        // 1. Validar torneo existe y está OPEN
+        // 2. Verificar usuario no está ya en el torneo
+        // 3. Crear invitación en BD
+        // 4. Enviar notificación WebSocket
+        
+        await this.socialWebSocketService.sendTournamentInvitation({
+            fromUserId: request.fromUserId,
+            fromUsername: sender.username,
+            fromUserAvatar: sender.avatar,
+            toUserId: request.invitedUserId,
+            tournamentId: request.tournamentId,
+            tournamentName: tournament.name,
+            message: request.message || `${sender.username} te ha invitado a un torneo!`,
+            invitationId: invitation.id,
+            maxParticipants: tournament.maxParticipants,
+            currentParticipants: tournament.currentParticipants
+        });
+
+        return Result.success({
+            success: true,
+            invitationId: invitation.id
+        });
+    }
+}
+
+// SendTournamentInvitation/SendTournamentInvitation.route.ts
+export default async function SendTournamentInvitationRoute(fastify: FastifyInstance) {
+    fastify.post(
+        '/tournaments/:id/invite',
+        {
+            schema: {
+                // Similar a SendGameInvitation.route.ts
+            }
+        },
+        async (req, reply) => {
+            const command = new SendTournamentInvitationCommand(fastify);
+            const request = {
+                fromUserId: req.user?.id,
+                tournamentId: req.params.id,
+                invitedUserId: req.body.invitedUserId,
+                message: req.body.message
+            };
+            
+            return fastify.handleCommand({
+                command,
+                request,
+                reply,
+                successStatus: 200
+            });
+        }
+    );
+}
+```
 
 ### **Mensajes WebSocket (Solo para torneos activos):**
 
@@ -856,6 +1021,75 @@ AND created_at < datetime('now', '-24 hours');
 5. **Escalabilidad**: El pong-game-manager ya maneja múltiples juegos concurrentes
 
 ## 14. **CAMBIOS NECESARIOS EN EL CÓDIGO EXISTENTE**
+
+### **Modificaciones en SocialWebSocketService:**
+
+```typescript
+// Añadir en Social.types.ts:
+export interface TournamentInvitationResponse extends SocialWebSocketResponse {
+    type: 'tournamentInvitation';
+    invitationId: number;
+    fromUserId: number;
+    fromUsername: string;
+    fromUserAvatar: string | null;
+    tournamentId: number;
+    tournamentName: string;
+    message: string;
+    maxParticipants: number;
+    currentParticipants: number;
+}
+
+// Añadir en ISocialWebSocketService.interface.ts:
+sendTournamentInvitation({
+    fromUserId,
+    fromUsername,
+    fromUserAvatar,
+    toUserId,
+    tournamentId,
+    tournamentName,
+    message,
+    invitationId,
+    maxParticipants,
+    currentParticipants
+}: {
+    fromUserId: number;
+    fromUsername: string;
+    fromUserAvatar: string | null;
+    toUserId: number;
+    tournamentId: number;
+    tournamentName: string;
+    message: string;
+    invitationId: number;
+    maxParticipants: number;
+    currentParticipants: number;
+}): Promise<Result<void>>;
+
+// Implementación en SocialWebSocketService.ts:
+async sendTournamentInvitation({ ... }): Promise<Result<void>> {
+    const targetSocket = this.activeConnections.get(toUserId);
+    
+    if (!targetSocket) {
+        // Usuario no conectado, la invitación queda pendiente en BD
+        return Result.success(undefined);
+    }
+
+    const notification: TournamentInvitationResponse = {
+        type: 'tournamentInvitation',
+        invitationId,
+        fromUserId,
+        fromUsername,
+        fromUserAvatar,
+        tournamentId,
+        tournamentName,
+        message,
+        maxParticipants,
+        currentParticipants
+    };
+
+    this.sendMessage(targetSocket, notification);
+    return Result.success(undefined);
+}
+```
 
 ### **Modificaciones Mínimas Requeridas:**
 
