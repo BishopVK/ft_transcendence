@@ -1,11 +1,19 @@
-# 📋 **DISEÑO DEL SISTEMA DE TORNEOS - DOCUMENTACIÓN COMPLETA**
+# 📋 **SISTEMA DE TORNEOS INTEGRADO - REUTILIZANDO SISTEMA DE READY EXISTENTE**
 
 ## 1. **VISIÓN GENERAL**
 
-El sistema de torneos se integrará como una capa adicional sobre el sistema actual de partidas, reutilizando toda la lógica de juego existente en `pong-game-manager`. La gestión se dividirá en tres partes:
-- **HTTP**: Operaciones CRUD (crear, unirse, invitar, aceptar)
-- **WebSocket**: Comunicación en tiempo real durante el torneo activo
-- **Manager**: Lógica de negocio y gestión del estado del torneo
+El sistema de torneos se integrará **completamente** sobre el sistema actual de partidas, **reutilizando el sistema de ready existente** en `pong-websocket` y `pong-game-manager`. Esta integración permite:
+
+- **✅ Cero modificaciones** al sistema de pong existente
+- **✅ Reutilización total** del sistema de ready ya implementado
+- **✅ Consistencia** en la experiencia de juego
+- **✅ Mantenimiento simplificado** - una sola lógica para ready/juego
+
+### **Arquitectura de Integración:**
+- **HTTP**: Operaciones CRUD (crear, unirse, invitar)
+- **WebSocket Tournament**: Coordinación del torneo y bracket
+- **WebSocket Pong** (existente): Manejo de partidas individuales con sistema de ready
+- **Pong Game Manager** (existente): Gestión de estado y ready de jugadores
 
 ## 2. **ARQUITECTURA DE BASE DE DATOS**
 
@@ -328,8 +336,8 @@ enum TournamentMessageType {
     GET_STATE = 'get_state',
     GET_BRACKET = 'get_bracket',
 
-    // Durante partidas
-    PLAYER_READY = 'player_ready',        // Confirmar listo para jugar
+    // Durante partidas - REUTILIZAR SISTEMA EXISTENTE
+    JOIN_TOURNAMENT_MATCH = 'join_tournament_match',  // Unirse a partida de torneo
     REQUEST_MATCH_INFO = 'request_match_info',
 
     // Modo espectador
@@ -359,11 +367,11 @@ enum TournamentEventType {
     ROUND_STARTED = 'round_started',
     ROUND_COMPLETED = 'round_completed',
 
-    // Eventos de partida
-    MATCH_READY_PHASE = 'match_ready_phase',    // Tienes 2 min para dar listo
-    MATCH_STARTING = 'match_starting',
+    // Eventos de partida - INTEGRACIÓN CON PONG-WEBSOCKET
+    MATCH_CREATED = 'match_created',           // Partida creada, conectar a pong-websocket
+    MATCH_READY_TIMEOUT = 'match_ready_timeout', // Deadline para conectarse (2 min)
     MATCH_COMPLETED = 'match_completed',
-    OPPONENT_READY = 'opponent_ready',
+    OPPONENT_CONNECTED = 'opponent_connected',
 
     // Descalificaciones
     PLAYER_DISQUALIFIED = 'player_disqualified',
@@ -382,12 +390,14 @@ enum TournamentEventType {
 }
 
 // Ejemplos de payloads específicos
-interface MatchReadyPhasePayload {
+interface MatchCreatedPayload {
     matchId: number;
+    gameId: number;      // ID del juego en pong-game-manager
     opponentName: string;
-    deadline: string;  // ISO timestamp
-    yourStatus: 'not_ready' | 'ready';
-    opponentStatus: 'not_ready' | 'ready';
+    deadline: string;    // ISO timestamp (2 min para conectarse)
+    pongWebSocketUrl: string; // URL del websocket de pong
+    tournamentId: number;
+    roundNumber: number;
 }
 
 interface DisqualificationPayload {
@@ -448,30 +458,33 @@ Para cada ronda:
     [Sistema] → Envía ROUND_STARTED a todos
 
     Para cada partida de la ronda:
-        [Sistema] → Envía MATCH_READY_PHASE a los 2 jugadores
-        [Timer] → 2 minutos para confirmar
+        [Sistema] → Crea partida en pong-game-manager
+        [Sistema] → Envía MATCH_CREATED a los 2 jugadores
+        [Timer] → 2 minutos para conectarse
 
-        [Jugador] --WS PLAYER_READY--> [tournament.websocket]
-            → Marca player_ready = true en BD
-            (Esto se hace con el is_ready en pong websocket)
+        [Jugador] --WS JOIN_TOURNAMENT_MATCH--> [tournament.websocket]
+            → Redirige al jugador al pong-websocket
+            → Jugador se conecta directamente al juego
 
-        Si ambos listos:
-            → Crea partida en pong-game-manager
-            → Jugadores juegan en pong-websocket
+        [Jugador] --WS SET_READY--> [pong.websocket] (SISTEMA EXISTENTE)
+            → Usa el sistema de ready ya implementado
+            → Cuando ambos listos → juego inicia automáticamente
 
-        Si timeout (2 min):
-            → Jugador no listo = DISQUALIFIED
-            → Oponente gana por W.O.
-            → Actualiza bracket
-```
+        Si timeout (2 min sin conectarse):
+            → Jugador ausente = DISQUALIFIED
+            Si timeout (2 min sin conectarse):
+                → Jugador ausente = DISQUALIFIED
+                → Oponente gana por W.O.
+                → Actualiza bracket
+    ```
 
-### 4. PROGRESIÓN ENTRE RONDAS
-```
-[pong-websocket] --Event--> [tournament-websocket]
-    → match:completed con winnerId
-    → Actualiza tournament_matches
-    → Elimina perdedor (single elimination)
-    → Verifica si ronda completa
+    ### 4. PROGRESIÓN ENTRE RONDAS
+    ```
+    [pong-game-manager] --Event--> [tournament-websocket]
+        → match:completed con winnerId (ya implementado)
+        → Actualiza tournament_matches
+        → Elimina perdedor (single elimination)
+        → Verifica si ronda completa
 
 Si ronda completa:
     → Genera siguiente ronda
@@ -518,7 +531,7 @@ class TournamentWebSocketService {
     }
 
     private setupPongEventListeners() {
-        // Registra listeners para eventos de pong
+        // REUTILIZAR eventos existentes del pong-game-manager
         fastify.pongEvents.on('match:completed', this.handleMatchCompleted);
         fastify.pongEvents.on('match:abandoned', this.handleMatchAbandoned);
         fastify.pongEvents.on('player:disconnected', this.handlePlayerDisconnected);
@@ -541,15 +554,10 @@ class TournamentWebSocketService {
     };
 }
 
-// === En pong-websocket (modificación mínima) ===
-// Añadir en handleMatchEnd o similar:
-if (match.game_type === 'pong_tournament') {
-    fastify.pongEvents?.emit('match:completed', {
-        matchId: match.id,
-        winnerId: winner.id,
-        scores: finalScores
-    });
-}
+// === INTEGRACIÓN CON SISTEMA EXISTENTE ===
+// El pong-game-manager YA emite eventos cuando terminan las partidas
+// Solo necesitamos marcar las partidas como 'tournament' type
+// NO requiere modificaciones en pong-websocket
 
 // === Sistema de Coordinación ===
 class TournamentMatchCoordinator {
@@ -559,54 +567,75 @@ class TournamentMatchCoordinator {
         player2Id: number,
         roundNumber: number
     ) {
-        // 1. Crear entrada en matches con tipo 'pong_tournament'
-        const match = await this.matchRepository.create({
-            game_type_id: GAME_TYPES.PONG_TOURNAMENT,
-            status: 'pending'
+        // 1. Crear partida directamente en pong-game-manager (REUTILIZAR)
+        const gameResult = await fastify.PongGameManager.createGame({
+            gameType: 'tournament',
+            tournamentId,
+            maxPlayers: 2
         });
 
-        // 2. Crear relación en tournament_matches
-        // 3. Establecer deadline para ready (2 minutos)
-        // 4. Notificar a jugadores vía WebSocket
+        // 2. Añadir jugadores al juego
+        await fastify.PongGameManager.addPlayerToGame(gameResult.gameId, player1Id);
+        await fastify.PongGameManager.addPlayerToGame(gameResult.gameId, player2Id);
+
+        // 3. Crear relación en tournament_matches
+        await this.createTournamentMatchRecord(tournamentId, gameResult.gameId, roundNumber);
+
+        // 4. Notificar MATCH_CREATED con gameId para conexión directa
+        this.notifyPlayersMatchCreated(gameResult.gameId, player1Id, player2Id);
     }
 }
 ```
 
 ## 9. **SISTEMA DE DESCALIFICACIÓN Y TIMEOUTS**
 
-```/dev/null/disqualification.ts#L1-40
-class DisqualificationService {
-    private readonly READY_TIMEOUT = 120; // 2 minutos en segundos
+```/dev/null/disqualification.ts#L1-45
+class TournamentDisqualificationService {
+    private readonly CONNECTION_TIMEOUT = 120; // 2 minutos para conectarse
+    private readonly READY_TIMEOUT = 60;       // 1 minuto adicional para dar ready
 
-    async startReadyTimer(tournamentMatch: TournamentMatch) {
-        const deadline = new Date(Date.now() + this.READY_TIMEOUT * 1000);
+    async startConnectionTimer(gameId: number, tournamentMatchId: number) {
+        const deadline = new Date(Date.now() + this.CONNECTION_TIMEOUT * 1000);
 
         // Guardar deadline en BD
-        await this.updateMatchDeadline(tournamentMatch.id, deadline);
+        await this.updateTournamentMatchDeadline(tournamentMatchId, deadline);
 
-        // Programar verificación
+        // Programar verificación de conexión
         setTimeout(async () => {
-            await this.checkReadyStatus(tournamentMatch);
-        }, this.READY_TIMEOUT * 1000);
+            await this.checkConnectionStatus(gameId, tournamentMatchId);
+        }, this.CONNECTION_TIMEOUT * 1000);
     }
 
-    async checkReadyStatus(tournamentMatch: TournamentMatch) {
-        const match = await this.getMatchStatus(tournamentMatch.id);
+    async checkConnectionStatus(gameId: number, tournamentMatchId: number) {
+        // REUTILIZAR: Verificar estado del juego en pong-game-manager
+        const gameStateResult = this.fastify.PongGameManager.getGameState(gameId);
+        
+        if (!gameStateResult.isSuccess) {
+            // Juego no encontrado - ambos jugadores descalificados
+            await this.disqualifyBothPlayers(tournamentMatchId, 'no_connection');
+            return;
+        }
 
-        // Descalificar a quien no esté listo
-        if (!match.player1Ready && !match.player2Ready) {
-            // Ambos descalificados, match cancelado
-            await this.disqualifyBoth(match);
-        } else if (!match.player1Ready) {
-            await this.disqualifyPlayer(match.player1Id, 'no_ready');
-            await this.declareWinner(match.player2Id);
-        } else if (!match.player2Ready) {
-            await this.disqualifyPlayer(match.player2Id, 'no_ready');
-            await this.declareWinner(match.player1Id);
+        const gameState = gameStateResult.value;
+        const { player1, player2 } = gameState;
+
+        // Verificar quién no se conectó
+        if (!player1 && !player2) {
+            await this.disqualifyBothPlayers(tournamentMatchId, 'no_connection');
+        } else if (!player1) {
+            await this.disqualifyPlayer(tournamentMatchId, 'player1', 'no_connection');
+            await this.declareWinnerByWalkover(tournamentMatchId, 'player2');
+        } else if (!player2) {
+            await this.disqualifyPlayer(tournamentMatchId, 'player2', 'no_connection');
+            await this.declareWinnerByWalkover(tournamentMatchId, 'player1');
+        } else {
+            // Ambos conectados - REUTILIZAR sistema de ready existente
+            // El pong-game-manager ya maneja el ready automáticamente
+            this.fastify.log.info(`Both players connected to tournament match ${tournamentMatchId}`);
         }
     }
 
-    async disqualifyPlayer(userId: number, reason: string) {
+    async disqualifyPlayer(tournamentMatchId: number, playerPosition: string, reason: string) {
         // 1. Actualizar estado en tournament_participants
         // 2. Notificar vía WebSocket
         // 3. Registrar en logs
@@ -777,7 +806,110 @@ WHERE status = 'open'
 AND created_at < datetime('now', '-24 hours');
 ```
 
-## 13. **VENTAJAS DEL DISEÑO ACTUALIZADO**
+## 13. **INTEGRACIÓN CON SISTEMA EXISTENTE - FLUJO COMPLETO**
+
+### **Reutilización del Sistema de Ready Existente:**
+
+```/dev/null/integration-flow.ts#L1-60
+// === FLUJO COMPLETO INTEGRADO ===
+
+1. **CREACIÓN DE PARTIDA DE TORNEO:**
+   [TournamentService] → Crear partida usando pong-game-manager existente
+   [TournamentService] → Añadir jugadores al juego
+   [TournamentService] → Marcar como tipo 'tournament'
+
+2. **NOTIFICACIÓN A JUGADORES:**
+   [tournament-websocket] → Envía MATCH_CREATED con gameId
+   [Frontend] → Recibe gameId y URL del pong-websocket
+   [Frontend] → Redirige automáticamente al juego
+
+3. **CONEXIÓN Y READY (SISTEMA EXISTENTE):**
+   [Jugador] → Se conecta al pong-websocket con gameId
+   [pong-websocket] → Autentica y añade al juego (YA IMPLEMENTADO)
+   [Jugador] → Envía SET_READY (ACTION EXISTENTE)
+   [pong-game-manager] → Maneja ready state (YA IMPLEMENTADO)
+   [pong-game-manager] → Auto-inicia cuando ambos ready (YA IMPLEMENTADO)
+
+4. **DURANTE EL JUEGO:**
+   [pong-websocket] → Maneja toda la lógica del juego (SIN CAMBIOS)
+   [pong-game-manager] → Procesa movimientos y estado (SIN CAMBIOS)
+
+5. **FINALIZACIÓN:**
+   [pong-game-manager] → Emite 'match:completed' (YA IMPLEMENTADO)
+   [tournament-websocket] → Escucha evento existente
+   [TournamentService] → Actualiza bracket y progresa torneo
+
+// === NO SE REQUIERE MODIFICAR ===
+- pong-websocket: Funciona tal como está
+- pong-game-manager: Solo añadir tipo 'tournament' opcional
+- Sistema de ready: Se reutiliza completamente
+- Sistema de movimientos: Sin cambios
+- Eventos de finalización: Ya están implementados
+```
+
+### **Ventajas de esta Integración:**
+
+1. **Zero Breaking Changes**: El sistema de pong existente sigue funcionando igual
+2. **Reutilización Total**: No duplicamos lógica de ready, conexión, o juego
+3. **Consistencia**: Misma experiencia de juego en torneos y partidas regulares
+4. **Mantenimiento Simple**: Un solo lugar para lógica de ready y juego
+5. **Escalabilidad**: El pong-game-manager ya maneja múltiples juegos concurrentes
+
+## 14. **CAMBIOS NECESARIOS EN EL CÓDIGO EXISTENTE**
+
+### **Modificaciones Mínimas Requeridas:**
+
+```/dev/null/required-changes.ts#L1-40
+// === 1. EN PONG-GAME-MANAGER (Solo añadir campo opcional) ===
+interface CreateGameOptions {
+    gameType?: 'regular' | 'tournament';  // NUEVO: opcional
+    tournamentId?: number;                 // NUEVO: opcional
+    maxPlayers: number;
+}
+
+class PongGameManager {
+    // MÉTODO EXISTENTE - solo añadir parámetros opcionales
+    async createGame(options: CreateGameOptions): Promise<Result<{ gameId: number }>> {
+        // ... lógica existente sin cambios
+        
+        // NUEVO: Solo guardar metadatos si es torneo
+        if (options.gameType === 'tournament' && options.tournamentId) {
+            this.gameMetadata.set(gameId, {
+                type: 'tournament',
+                tournamentId: options.tournamentId
+            });
+        }
+        
+        return Result.success({ gameId });
+    }
+}
+
+// === 2. EVENTOS YA EXISTENTES - Solo escuchar ===
+// El PongGameManager ya emite estos eventos:
+// - 'match:completed' 
+// - 'match:abandoned'
+// - 'player:disconnected'
+// 
+// SOLO necesitamos registrar listeners en tournament-websocket
+
+// === 3. NO MODIFICAR ===
+// - pong-websocket: Funciona tal como está
+// - Sistema de ready: Se reutiliza completamente  
+// - Lógica de juego: Sin cambios
+// - WebSocket handlers: Sin cambios
+```
+
+### **Nuevos Archivos a Crear:**
+- `tournament-websocket/` (nuevo módulo completo)
+- `tournament-service/` (nueva lógica de negocio)
+- Migraciones de BD para tablas de torneo
+
+### **Cero Breaking Changes:**
+- El sistema de pong existente funciona igual
+- Usuarios pueden seguir jugando partidas normales
+- API de pong no cambia
+
+## 15. **VENTAJAS DEL DISEÑO ACTUALIZADO**
 
 1. **Sin redundancia en BD**: Usamos el estado del torneo existente en lugar de tablas adicionales
 2. **Consultas eficientes**: Los índices permiten verificación rápida de torneos activos
