@@ -63,10 +63,10 @@ export function initGame3D() {
 	const camera = new ArcRotateCamera("camera", Math.PI / 2 + Math.PI, 0 , 12, Vector3.Zero(), scene);
 	camera.attachControl(canvas, true);
 
-	camera.inputs.removeByType("ArcRotateCameraPointersInput");
+	//camera.inputs.removeByType("ArcRotateCameraPointersInput");
 	// ✅ Permitir el zoom (rueda del ratón sigue funcionando)
-	camera.lowerRadiusLimit = 9.5;
-	camera.upperRadiusLimit = 15;
+	//camera.lowerRadiusLimit = 9.5;
+	//camera.upperRadiusLimit = 15;
 
 
 
