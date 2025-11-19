@@ -144,7 +144,7 @@ export async function initFriendsSidebar() {
         const gameId = await fetchGameId(confirmed.maxPoints, confirmed.maxTime, confirmed.gameMode); // Create game PONG --> Y si hay otro juego?
         inviteMultiplayer(username, gameId);
         //const playerView = "3D";
-        //navigateTo(`playing?id=${gameId}&mutiPlayer&view=${playerView}`); // Temporal para pruebas?
+        //navigateTo(`playing?id=${gameId}&multiPlayer&view=${playerView}`); // Temporal para pruebas?
         //showToast("Enviada invitación a: " + username, "success");
       }
     }
@@ -153,7 +153,7 @@ export async function initFriendsSidebar() {
   updateTexts();
 }
 
-// Function to invite a friend to play multiplayer game
+// Function to invite a friend to play mult game
 export async function inviteMultiplayer(username: string | undefined, gameId: number, message: string = "te invita a jugar a Pong") {
   try {
     const response = await fetch(apiUrl(`/game-invitation/send-invitation`), {

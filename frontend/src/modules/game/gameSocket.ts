@@ -84,7 +84,7 @@ export class GameWebSocket {
 	private wsUrl: string;
 	private start: number;
 	private div: HTMLDivElement | null = null;
-	//private ready = false;
+	private ready: boolean;
 	private player1: Player | undefined;
 	private player2: Player | undefined;
 	private	scores: Score | undefined;
@@ -105,10 +105,12 @@ export class GameWebSocket {
 		this.start = 0;
 		this.up = 0;
 		this.down = 0;
+		this.ready = false;
+		console.log("GAME SOCKET ON");
 	}
 
 	connect() {
-		console.log("conectado websocket");
+		console.log("conectado websocketttt");
 		this.socket = new WebSocket(this.wsUrl);
 
 		this.socket.addEventListener("open", () => {
@@ -154,21 +156,21 @@ export class GameWebSocket {
 		this.socket?.send(JSON.stringify(obj));
 		obj.action = Actions.REQUEST_STATE;
 		this.socket?.send(JSON.stringify(obj));
-//		if (this.ready == false)
-//		{
-		const userConfirmed = await modal({type: "setReady"});
-		if (!userConfirmed)
-		{
-			console.log("User canceled the modal");
-			obj.action = Actions.LEAVE_GAME;
+	//	if (this.ready == false)
+	//	{
+			const userConfirmed = await modal({type: "setReady"});
+			if (!userConfirmed)
+			{
+				console.log("User canceled the modal");
+				obj.action = Actions.LEAVE_GAME;
+				this.socket?.send(JSON.stringify(obj));
+				navigateTo("dashboard", false, true);
+				return ;
+			}
+			obj.action = Actions.SET_READY;
 			this.socket?.send(JSON.stringify(obj));
-			navigateTo("dashboard", false, true);
-			return ;
-		}
-		obj.action = Actions.SET_READY;
-		this.socket?.send(JSON.stringify(obj));
-		//this.ready = true;
-//		}
+			this.ready = true;
+	//	}
 		this.moveUp = (event: KeyboardEvent) => {
 			const key = event.key;
 			if (key === "ArrowUp" || key === "w")

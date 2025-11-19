@@ -125,11 +125,8 @@ export function createCamera(playerView: string | null, scene:Scene, canvas:HTML
 	if (playerView === "3D")
 		camera = new ArcRotateCamera("camera", Math.PI / 2 + Math.PI, Math.PI / 4, 12, Vector3.Zero(), scene);
 	else
-	{
 		camera = new ArcRotateCamera("camera", Math.PI / 2 + Math.PI, 0 , 12, Vector3.Zero(), scene);
-		//girar con el ratón
-		camera.inputs.removeByType("ArcRotateCameraPointersInput");
-	}
+	camera.inputs.removeByType("ArcRotateCameraPointersInput");
 	camera.attachControl(canvas, true);
 
 	//girar con el teclado

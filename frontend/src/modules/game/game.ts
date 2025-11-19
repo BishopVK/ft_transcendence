@@ -4,7 +4,7 @@ import { showToast } from "@/components/toast";
 import { Engine, Scene, HemisphericLight, Vector3 } from "@babylonjs/core";
 import type { Ball, Player, Score } from "./gameData";
 import { createBall, createCamera, createPlayerLeft, createPlayerRight, createScores, createTable } from "./createGameObjs";
-import { createGameSocket, getGameSocket } from "./gameSocket";
+import { getGameSocket } from "./gameSocket";
 
 export function renderValues(posPlayerL:number, playerL:Player | undefined, posPlayerR:number, playerR:Player | undefined,
 	pointsL:number, pointsR:number, scores:Score | undefined, ballX:number, ballY:number, ball:Ball | undefined)
@@ -83,8 +83,8 @@ export function initGame3D() {
 
 
 
-	const token = localStorage.getItem("access_token");
-	const ws = createGameSocket(token);
+	// const token = localStorage.getItem("access_token");
+	// const ws = createGameSocket(token);
 	
 	
 	
@@ -97,7 +97,7 @@ export function initGame3D() {
 		navigateTo("dashboard", false, true);
 		return ;
 	}
-	ws.authenticate(Number(id));
+	socket.authenticate(Number(id));
 	socket.initializeGame(Number(id), playerLeft, playerRight, scores, ball, engine, scene);
 	socket.play();
 		
