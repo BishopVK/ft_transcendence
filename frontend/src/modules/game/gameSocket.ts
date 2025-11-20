@@ -165,6 +165,7 @@ export class GameWebSocket {
 		this.socket?.send(JSON.stringify(obj));
 		obj.action = Actions.REQUEST_STATE;
 		this.socket?.send(JSON.stringify(obj));
+		console.log("ready = ", this.ready);
 	//	if (this.ready == false)
 	//	{
 			const userConfirmed = await modal({type: "setReady"});

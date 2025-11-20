@@ -4,7 +4,7 @@ import { showToast } from "@/components/toast";
 import { Engine, Scene, HemisphericLight, Vector3 } from "@babylonjs/core";
 import type { Ball, Player, Score } from "./gameData";
 import { createBall, createCamera, createPlayerLeft, createPlayerRight, createScores, createTable } from "./createGameObjs";
-import { createGameSocket, getGameSocket } from "./gameSocket";
+import { getGameSocket } from "./gameSocket";
 
 export function renderValues(posPlayerL:number, playerL:Player | undefined, posPlayerR:number, playerR:Player | undefined,
 	pointsL:number, pointsR:number, scores:Score | undefined, ballX:number, ballY:number, ball:Ball | undefined)
@@ -72,8 +72,8 @@ export function initGame3D() {
 	// PELOTA
 	const ball = createBall(playerView, scene);
 
-	const token = localStorage.getItem("access_token");
-	createGameSocket(token);
+	// const token = localStorage.getItem("access_token");
+	// createGameSocket(token);
 
 	const socket = getGameSocket();
 	if (!socket)
