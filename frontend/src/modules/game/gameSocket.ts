@@ -106,15 +106,13 @@ export class GameWebSocket {
 		this.up = 0;
 		this.down = 0;
 		this.ready = false;
-		console.log("GAME SOCKET ON");
 	}
 
 	connect() {
-		console.log("conectado websocketttt");
 		this.socket = new WebSocket(this.wsUrl);
 
 		this.socket.addEventListener("open", () => {
-			console.log("🟢", t("WsConnected"));
+			console.log("🟢", t("game"), ": ", t("WsConnected"));
 		})
 
 		this.socket.addEventListener("message", async (msg) => {
@@ -123,16 +121,16 @@ export class GameWebSocket {
 				const data = JSON.parse(msg.data);
 				this.handleMessage(data);
 			} catch (err) {
-				console.error(`❌ ${t("ErrorParsingMsg")}`, err);
+				console.error(`❌ ${t("game")}: ${t("ErrorParsingMsg")}`, err);
 			}
 		})
 
 		this.socket.onclose = () => {
-			console.log("🔴", t("WsClosed"));
+			console.log("🔴", t("game"), ": ", t("WsClosed"));
 		};
 
 		this.socket.onerror = (err) => {
-			console.error(`⚠️ ${t("WsError")}`, err);
+			console.error(`⚠️ ${t("game")}: ${t("WsError")}`, err);
 		};
 	}
 
@@ -144,6 +142,17 @@ export class GameWebSocket {
 			}
 			this.socket?.addEventListener("open", () => resolve(), { once: true });
 		});
+	}
+
+	public async checkSocket()
+	{
+		await this.waitForOpen();
+		if (!this.socket)
+		{
+			console.log("cramos el wss");
+			this.socket = new WebSocket(this.wsUrl);
+		}
+		console.log("wss ya creadooo");
 	}
 
 	public async authenticate(gameId:number) {
@@ -164,6 +173,7 @@ export class GameWebSocket {
 				console.log("User canceled the modal");
 				obj.action = Actions.LEAVE_GAME;
 				this.socket?.send(JSON.stringify(obj));
+				this.destroy();
 				navigateTo("dashboard", false, true);
 				return ;
 			}
@@ -209,6 +219,8 @@ export class GameWebSocket {
 				{
 					document.removeEventListener("keydown", this.moveUp!);
     				document.removeEventListener("keyup", this.moveDown!);
+					this.moveUp = undefined;
+					this.moveDown = undefined;
 					this.engine?.stopRenderLoop();
 				}
 				await endGameAndErrors(data.error, this.gameId, this.player1, this.player2,
@@ -303,6 +315,16 @@ export class GameWebSocket {
 			this.start = 0;
 		}
 	}
+
+	public destroy() {
+		if (this.socket)
+		{
+		    console.log(`${t("game")}: ${t("ClosingWs")}`);
+      		this.socket.close();
+			this.socket = null;
+		}
+		instance = null;
+	}
 }
 
 let instance: GameWebSocket | null = null;
@@ -313,9 +335,12 @@ export function createGameSocket(token: string| null): GameWebSocket {
 	instance = new GameWebSocket(token);
 	instance.connect();
   }
+  instance.checkSocket();
   return instance;
 }
 
 export function getGameSocket(): GameWebSocket | null {
   return instance;
 }
+
+//export function

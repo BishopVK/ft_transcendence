@@ -143,8 +143,8 @@ export async function initFriendsSidebar() {
 
         const gameId = await fetchGameId(confirmed.maxPoints, confirmed.maxTime, confirmed.gameMode); // Create game PONG --> Y si hay otro juego?
         inviteMultiplayer(username, gameId);
-        //const playerView = "3D";
-        //navigateTo(`playing?id=${gameId}&multiPlayer&view=${playerView}`); // Temporal para pruebas?
+        const playerView = "3D";
+        navigateTo(`playing?id=${gameId}&multiPlayer&view=${playerView}`); // Temporal para pruebas?
         //showToast("Enviada invitación a: " + username, "success");
       }
     }

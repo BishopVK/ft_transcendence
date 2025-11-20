@@ -4,7 +4,7 @@ import { showToast } from "@/components/toast";
 import { Engine, Scene, HemisphericLight, Vector3 } from "@babylonjs/core";
 import type { Ball, Player, Score } from "./gameData";
 import { createBall, createCamera, createPlayerLeft, createPlayerRight, createScores, createTable } from "./createGameObjs";
-import { getGameSocket } from "./gameSocket";
+import { createGameSocket, getGameSocket } from "./gameSocket";
 
 export function renderValues(posPlayerL:number, playerL:Player | undefined, posPlayerR:number, playerR:Player | undefined,
 	pointsL:number, pointsR:number, scores:Score | undefined, ballX:number, ballY:number, ball:Ball | undefined)
@@ -16,15 +16,6 @@ export function renderValues(posPlayerL:number, playerL:Player | undefined, posP
 
 	playerL.paddle.position.z = (posPlayerL / 100) * 8 - 4;
 	playerR.paddle.position.z = (posPlayerR / 100) * 8 - 4;
-
-	if (playerL.paddle.position.z < playerL.topPercentage)
-		playerL.paddle.position.z = playerL.topPercentage;
-	else if (playerL.paddle.position.z > playerL.bottomPercentage)
-		playerL.paddle.position.z = playerL.bottomPercentage;
-	if (playerR.paddle.position.z < playerR.topPercentage)
-		playerR.paddle.position.z = playerR.topPercentage;
-	else if (playerR.paddle.position.z > playerR.bottomPercentage)
-		playerR.paddle.position.z = playerR.bottomPercentage;
 
 	scores.pointsLeft = pointsL;
 	scores.pointsRight = pointsR;
@@ -81,14 +72,9 @@ export function initGame3D() {
 	// PELOTA
 	const ball = createBall(playerView, scene);
 
+	const token = localStorage.getItem("access_token");
+	createGameSocket(token);
 
-
-	// const token = localStorage.getItem("access_token");
-	// const ws = createGameSocket(token);
-	
-	
-	
-	
 	const socket = getGameSocket();
 	if (!socket)
 	{
@@ -100,7 +86,7 @@ export function initGame3D() {
 	socket.authenticate(Number(id));
 	socket.initializeGame(Number(id), playerLeft, playerRight, scores, ball, engine, scene);
 	socket.play();
-		
+
 	window.addEventListener("resize", () => {
 		const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 		if (!canvas)
