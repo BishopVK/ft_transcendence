@@ -1,226 +1,289 @@
 # ft_transcendence
 
-<!--- [ ] +1 Use a framework to build the backend.
-- [ ] +1 Standard user management, authentication and users across tournaments
-+1 Remote players
-+1 Replace Basic Pong with Server-Side Pong and Implementing an API.
-
-0.5 Use a framework or a toolkit to build the frontend.
-0.5 Use a database for the backend.
-0.5 User and Game Stats Dashboards
-0.5 Expanding Browser Compatibility.
-0.5 Multiple language support.
-
-
-??
-+1 implement remote authentication
-+1 Implementing Advanced 3D Techniques
-+1 add another game with user history and matchmaking.
-+1 Live Chat.
-+0.5 Add accessibility for Visually Impaired Users
-hola-->
-
-- [ ] Major module: Use a framework to build the backend.
-In this major module, you are required to use a specific web framework for backend
-development: Fastify with Node.js .
+> Proyecto final del **Common Core de 42**. Plataforma web completa de Pong multijugador en tiempo real, con enfoque en arquitectura, experiencia de usuario y sistemas reales.
 
 ---
 
-- [ ] Minor module: Use a framework or toolkit to build the front-end.
-Your frontend development must use the Tailwind CSS in addition of the Type-
-script, and nothing else.
+## 🕹️ Visión general del proyecto
+
+**ft_transcendence** es el proyecto final del **Common Core de 42**, planteado como una aplicación web de gran escala inspirada en el clásico **Pong (1972)**.
+
+Más allá de ser un juego, este proyecto demuestra la capacidad de **diseñar, desarrollar y desplegar un sistema full‑stack complejo**, integrando tiempo real, autenticación, multijugador, seguridad y una arquitectura moderna de frontend.
+
+La plataforma permite partidas en tiempo real, torneos, usuarios persistentes, interacción social y un motor de juego autoritativo en servidor, todo ejecutándose dentro de un entorno completamente **dockerizado**.
+
+Este repositorio está pensado no solo como entrega académica, sino como un **proyecto técnico defendible y orientado a entorno profesional**.
 
 ---
 
-- [ ] Minor module: Use a database for the backend -and more.
-The designated database for all DB instances in your project is SQLite This choice
-ensure data consistency and compatibility across all project components and may
-be a prerequisite for other modules, such as the backend Framework module.
+## 🚀 Funcionalidades
+
+### 🕹️ Gameplay
+- Partidas de Pong en tiempo real
+- Multijugador local y **remoto**
+- Sistema de torneos con matchmaking
+- Motor de juego autoritativo en servidor
+- Físicas y reglas idénticas para todos los jugadores
+
+### 👤 Usuarios y sistema social
+- Registro e inicio de sesión
+- Perfiles persistentes con avatar
+- Sistema de amigos y estado online
+- Historial de partidas y estadísticas
+- Invitaciones a jugar en multijugador a tiempo real
+
+### 🎨 Experiencia de usuario (Frontend)
+- UI y UX totalmente personalizadas
+- Diseño responsive (desktop y mobile)
+- Modo oscuro y personalización visual
+- Soporte multi‑idioma (3 idiomas)
+- Sistema de modales, toasts y popovers
+- Navegación accesible y feedback visual constante
+
+### 🧱 Plataforma
+- Arquitectura SPA
+- APIs REST y WebSocket
+- Contenedores Docker
+- Flujos de autenticación seguros
 
 ---
 
-- [ ] Major module: Standard user management, authentication and users across tour-
-naments.
-    - [ ] Users can securely subscribe to the website.
-    - [ ]  Registered users can securely log in.
-    - [ ] Users can select a unique display name to participate in tournaments.
-    - [ ] Users can update their information.
-    - [ ] Users can upload an avatar, with a default option if none is provided.
-    - [ ] Users can add others as friends and view their online status.
-    - [ ] User profiles display stats, such as wins and losses.
-    - [ ] Each user has a Match History including 1v1 games, dates, and relevant
-details, accessible to logged-in users.
+## 🧩 Módulos implementados
+
+El proyecto alcanza el **100% de completado**, superando el mínimo de **7 módulos mayores** exigidos por el enunciado oficial y los módulos extra para el bonus.
+
+### ✅ Módulos mayores
+- **Web – Framework de Backend** (Fastify + Node.js)
+- **Gestión estándar de usuarios**
+  - Registro / login
+  - Perfiles
+  - Avatar
+  - Amigos
+  - Historial de partidas
+  - Estadísticas
+- **Remote Players** (Multijugador en tiempo real)
+- **IA** (Oponente controlado por nuestra propia IA)
+- **Pong en servidor + API**
+- **Gráficos 3D avanzados** (Babylon.js)
+
+### ✅ Módulos menores
+- **Framework y tooling de frontend** (TypeScript + Tailwind)
+- **Base de datos** (SQLite)
+- **Dashboards de estadísticas de usuario y partidas**
+- **Soporte multi‑idioma**
+- **Compatibilidad con múltiples navegadores**
+- **Diseño responsive** (Compatible con todos los dispositivos)
+- **Personalización del juego** (Duración y puntos de la partida, dificultad de la IA, modo 2D/3D, colores)
 
 ---
 
-- [ ] Major module: Remote players
-It should be possible for two players to play remotely. Each player is located on a
-separated computer, accessing the same website and playing the same Pong game.
+## 🏗️ Tecnologías
+
+### Frontend
+- TypeScript
+- Arquitectura SPA
+- Vite
+- Tailwind CSS
+- Babylon.js (gráficos 3D)
+
+### Backend
+- Node.js
+- Fastify
+- APIs REST y WebSocket
+- OAuth 2.0
+
+### Base de datos
+- SQLite
+
+### DevOps y tooling
+- Docker y Docker Compose
+- Makefile personalizado
+- Arranque con un solo comando
 
 ---
 
-- [ ] Minor module: Game customization options.
-In this minor module, the goal is to provide customization options for all available
-games on the platform. Key features and objectives include:
-18ft_transcendence
-Surprise.
-    - [ ] Offer customization features, such as power-ups, attacks, or different maps,
-    that enhance the gameplay experience.
-    - [ ] Allow users to choose a default version of the game with basic features if they
-    prefer a simpler experience.
-    - [ ] Ensure that customization options are available and applicable to all games
-    offered on the platform.
-    - [ ] Implement user-friendly settings menus or interfaces for adjusting game pa-
-    rameters.
-    - [ ] Maintain consistency in customization features across all games to provide a
-    unified user experience.
-    This module aims to give users the flexibility to tailor their gaming experience
-    across all available games by providing a variety of customization options while
-    also offering a default version for those who prefer a straightforward gameplay
-    experience.
-    
----
+## 🔐 Seguridad
 
-- [ ] Major module: Introduce an AI opponent.
-In this major module, the objective is to incorporate an AI player into the game.
-Notably, the use of the A* algorithm is not permitted for this task. Key features
-and goals include:
-    - [ ] Develop an AI opponent that provides a challenging and engaging gameplay
-    experience for users.
-    - [ ] The AI must replicate human behavior, which means that in your AI imple-
-    mentation, you must simulate keyboard input. The constraint here is that
-    the AI can only refresh its view of the game once per second, requiring it to
-    anticipate bounces and other actions.
-    The AI must utilize power-ups if you have chosen to implement the
-    Game customization options module.
-    - [ ] Implement AI logic and decision-making processes that enable the AI player
-    to make intelligent and strategic moves.
-    - [ ] Explore alternative algorithms and techniques to create an effective AI player
-    without relying on A*.
-    - [ ] Ensure that the AI adapts to different gameplay scenarios and user interac-
-    tions.
-    You will need to explain in detail how your AI works during your
-    evaluation. Creating an AI that does nothing is strictly prohibited;
-    it must have the capability to win occasionally.
-    This major module aims to enhance the game by introducing an AI opponent that
-    adds excitement and competitiveness without relying on the A* algorithm.
-    
----
-    
-- [ ] Minor module: User and Game Stats Dashboards.
-In this minor module, the goal is to introduce dashboards that display statistics for
-individual users and game sessions. Key features and objectives include:
-    - [ ] Create user-friendly dashboards that provide users with insights into their
-    gaming statistics.
-    20ft_transcendence
-    Surprise.
-    - [ ] Develop a separate dashboard for game sessions, showing detailed statistics,
-    outcomes, and historical data for each match.
-    - [ ] Ensure that the dashboards offer an intuitive and informative user interface
-    for tracking and analyzing data.
-    - [ ] Implement data visualization techniques, such as charts and graphs, to present
-    statistics in a clear and visually appealing manner.
-    - [ ] Allow users to access and explore their own gaming history and performance
-    metrics conveniently.
-    - [ ] Feel free to add any metrics you deem useful.
-    This minor module aims to empower users with the ability to monitor their gaming
-    statistics and game session details through user-friendly dashboards, providing a
-    comprehensive view of their gaming experience.
-    
----
+La seguridad se ha tratado como un **requisito de diseño**, no como un añadido posterior:
 
-- [ ] Major module: Implementing Advanced 3D Techniques
-This major module,"Graphics," focuses on enhancing the visual aspects of the Pong
-game. It introduces the use of advanced 3D techniques to create a more immersive
-gaming experience. Specifically, the Pong game will be developed using Babylon.js
-to achieve the desired visual effects.
-    - [ ] Advanced 3D Graphics: The primary goal of this module is to implement
-    advanced 3D graphics techniques to elevate the visual quality of the Pong
-    game. By utilizing Babylon.js , the goal is to create stunning visual effects
-    that immerse players in the gaming environment.
-    - [ ] Immersive Gameplay: The incorporation of advanced 3D techniques enhances
-    the overall gameplay experience by providing users with a visually engaging
-    and captivating Pong game.
-    - [ ] Technology Integration: The chosen technology for this module is Babylon.js .
-    These tools will be used to create the 3D graphics, ensuring compatibility and
-    optimal performance.
-    This major module aims to revolutionize the Pong game’s visual elements by intro-
-    ducing advanced 3D techniques. Through the use of Babylon.js , we aim to provide
-    players with an immersive and visually stunning gaming experience.
+- Hashing seguro de contraseñas
+- Validación de inputs en cliente y servidor
+- Protección frente a XSS e inyecciones
+- Autenticación basada en tokens
+- Comunicación segura HTTPS / WSS
+- Variables de entorno aisladas mediante `.env`
 
 ---
 
-- [ ] Minor module: Expanding Browser Compatibility.
-In this minor module, the objective is to enhance the compatibility of the web
-application by adding support for an additional web browser. Key features and
-objectives include:
-    - [ ] Extend browser support to include an additional web browser, ensuring that
-    users can access and use the application seamlessly.
-    - [ ] Conduct thorough testing and optimization to ensure that the web application
-    functions correctly and displays correctly in the newly supported browser.
-    - [ ] Address any compatibility issues or rendering discrepancies that may arise in
-    the added web browser.
-    - [ ] Ensure a consistent user experience across all supported browsers, maintaining
-    usability and functionality.
-    This minor module aims to broaden the accessibility of the web application by
-    supporting an additional web browser, providing users with more choices for their
-    browsing experience
+## 🐳 Instalación y ejecución
+
+### Requisitos
+
+Antes de ejecutar el proyecto necesitas tener **Docker** y **Docker Compose** instalados.
+
+#### Instalar Docker
+
+- **Linux**: https://docs.docker.com/engine/install/
+- **macOS**: https://docs.docker.com/desktop/setup/install/mac-install/
+- **Windows**: https://docs.docker.com/desktop/setup/install/windows-install/
+
+Una vez instalado, verifica la instalación:
+```bash
+docker --version
+docker compose version
+```
 
 ---
 
-- [ ] Minor module: Multiple language support.
-In this minor module, the objective is to ensure that your website supports multiple
-languages to cater to a diverse user base. Key features and goals include:
-    - [ ] Implement support for a minimum of three languages on the website to ac-
-    commodate a broad audience.
-    27ft_transcendence
-    Surprise.
-    - [ ] Provide a language switcher or selector that allows users to easily change the
-    website’s language based on their preferences.
-    - [ ] Translate essential website content, such as navigation menus, headings, and
-    key information, into the supported languages.
-    - [ ] Ensure that users can navigate and interact with the website seamlessly, re-
-    gardless of the selected language.
-    - [ ] Consider using language packs or localization libraries to simplify the transla-
-    tion process and maintain consistency across different languages.
-    - [ ] Allow users to set their preferred language as the default for subsequent visits.
-    This minor module aims to enhance the accessibility and inclusivity of your website
-    by offering content in multiple languages, making it more user-friendly for a diverse
-    international audience.
+### ▶️ Ejecución del proyecto
+
+El proyecto está completamente dockerizado y puede arrancarse usando el **Makefile** (recomendado) o directamente con Docker Compose.
+
+#### Opción recomendada (Makefile)
+
+```bash
+make up
+```
+
+Este comando:
+- Genera certificados HTTPS locales
+- Construye las imágenes necesarias
+- Levanta todos los servicios
+
+#### Opción alternativa (Docker Compose)
+
+```bash
+docker compose up --build
+```
+
+Ambas opciones lanzan el mismo entorno.
 
 ---
 
-- [ ] Major module: Replace Basic Pong with Server-Side Pong and Implementing an
-API.
-In this major module, the goal is to replace the basic Pong game with a server-
-side Pong game, accompanied by the implementation of an API. Key features and
-objectives include:
-    - [ ] Develop server-side logic for the Pong game to handle gameplay, ball move-
-    ment, scoring, and player interactions.
-    - [ ] Create an API that exposes the necessary resources and endpoints to interact
-    with the Pong game, allowing partial usage of the game via the Command-Line
-    Interface (CLI) and web interface.
-    - [ ] Design and implement the API endpoints to support game initialization, player
-    controls, and game state updates.
-    - [ ] Ensure that the server-side Pong game is responsive, providing an engaging
-    and enjoyable gaming experience.
-    - [ ] Integrate the server-side Pong game with the web application, allowing users
-    to play the game directly on the website.
-    This major module aims to elevate the Pong game by migrating it to the server
-    side, enabling interaction through both a web interface and CLI while offering an
-    API for easy access to game resources and features.
+### 🛠️ Comandos disponibles en el Makefile
+
+| Comando | Descripción |
+|--------|-------------|
+| `make up` | Levanta los contenedores |
+| `make up-detached` | Levanta los contenedores en segundo plano |
+| `make down` | Detiene los contenedores |
+| `make restart` | Reinicia todos los servicios |
+| `make logs` | Muestra los logs en tiempo real |
+| `make build` | Construye las imágenes Docker |
+| `make rebuild` | Reconstruye todo desde cero |
+| `make clean` | Limpia contenedores, redes y volúmenes |
+| `make fclean` | Limpieza completa (incluye imágenes y base de datos) |
+| `make certs` | Regenera certificados HTTPS |
+| `make clean-certs` | Elimina certificados locales |
+| `make format-front` | Formatea el frontend con Prettier |
+| `make format-back` | Formatea el backend con Prettier |
 
 ---
 
-- [ ] Minor module: Support on all devices.
-In this module, the main focus is to ensure that your website works seamlessly on
-all types of devices. Key features and objectives include:
-    - [ ] Ensure the website is responsive, adapting to different screen sizes and orien-
-tations, providing a consistent user experience on desktops, laptops, tablets,
-and smartphones.
-    - [ ] Ensure that users can easily navigate and interact with the website using
-different input methods, such as touchscreens, keyboards, and mice, depending
-on the device they are using.
+### Ejecución del proyecto
 
-This module aims to provide a consistent and user-friendly experience on all devices,
-maximizing accessibility and user satisfaction.
+El proyecto está completamente dockerizado y puede arrancarse de dos formas.
+
+#### ▶️ Opción recomendada (Makefile)
+
+```bash
+make up
+```
+
+Este comando se encarga de construir las imágenes y levantar todos los servicios necesarios.
+
+#### ▶️ Opción alternativa (Docker Compose)
+
+```bash
+docker compose up --build
+```
+
+Ambas opciones lanzan exactamente el mismo entorno.
+
+---
+
+## 📁 Repository Structure (simplified)
+```
+├── frontend/
+├── backend/
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## 👥 Desglose de contribuciones
+
+Proyecto desarrollado en equipo, con responsabilidades bien diferenciadas.
+
+### Mi contribución (Frontend & Plataforma)
+
+Fui responsable de **todo el frontend y la infraestructura de la plataforma**, incluyendo:
+
+- Arquitectura completa del frontend (SPA)
+- Diseño UI & UX
+- Sistema de componentes
+- Layout responsive y accesibilidad
+- Modo oscuro y personalización visual
+- Sistema multi‑idioma (3 idiomas)
+- Formularios (registro, login, perfil, cambio de contraseña)
+- Gestión de avatar y personalización de usuario
+- Dashboards de usuario, historial de partidas e historial de torneos
+- Sidebar de amistades e invitaciones a multijugador
+- Sistema de modales, toasts y popovers
+- Configuración de WebSockets de torneos y de amistades
+- Configuración del servidor de desarrollo (Vite)
+- Dockerización del proyecto
+- Orquestación de contenedores
+- Makefile y tooling de desarrollo
+
+En resumen: **todo lo visible y utilizable por el usuario**, excluyendo únicamente el motor del juego y la lógica backend.
+
+### Contribución del equipo
+- Arquitectura backend
+- APIs y lógica de servidor
+- Motor del Pong en servidor
+- Sincronización en tiempo real del gameplay
+
+---
+
+## 📸 Capturas de pantalla
+
+### Home
+![Home](/screenshots/home.png "Home")
+
+### Registro e inicio de sesión
+![Registro e inicio de sesión](/screenshots/register.png "Registro e inicio de sesión")
+
+### Perfil y panel de administración
+![Perfil y panel de administración](screenshots/profile.png "Perfil y panel de administración")
+
+### Juego 2D y 3D
+![Juego 2D y 3D](screenshots/gameplay.png "Juego 2D y 3D")
+
+### Configuración de usuario
+![Configuración de usuario](screenshots/settings.png "Configuración de usuario")
+
+### Lista de amigos
+![Lista de amigos](screenshots/friendbar.png "Lista de amigos")
+
+### Configuración de partidas/torneos
+![Configuración de partidas/torneos](screenshots/game_config.png "Configuración de partidas/torneos")
+
+
+---
+
+## 🏁 Notas finales
+
+**ft_transcendence** representa el cierre del Common Core de 42:
+
+- Aplicación compleja en tiempo real
+- Fuerte enfoque en arquitectura y seguridad
+- Separación clara de responsabilidades
+- Desarrollo frontend con mentalidad de producto real
+
+Este proyecto refleja mi forma de trabajar:
+**arquitectura limpia, experiencia de usuario cuidada y código mantenible**.
+
+> "No va solo de Pong — va de todo lo que hay alrededor." 🚀
+
