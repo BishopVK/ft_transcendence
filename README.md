@@ -1,3 +1,9 @@
+## Grade
+
+| **Score**           | **Description**     |
+|-----------------------|---------------|
+| <p align="center"><img width="222px" alt="170px" src="./img/Score_125.png"></p> | **Mandatory part + Full bonus part**   |
+
 # ft_transcendence
 
 > Proyecto final del **Common Core de 42**. Plataforma web completa de Pong multijugador en tiempo real, con enfoque en arquitectura, experiencia de usuario y sistemas reales.
